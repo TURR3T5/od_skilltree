@@ -43,7 +43,7 @@ export const SkillUpgradeModal: React.FC<SkillUpgradeModalProps> = ({ skill, isO
 				<Text>{skill.description}</Text>
 
 				<Group>
-					<Text fw={600}>Level:</Text>
+					<Text fw={600}>Niveau:</Text>
 					<Text>
 						{skill.level} / {skill.maxLevel}
 					</Text>
@@ -53,28 +53,28 @@ export const SkillUpgradeModal: React.FC<SkillUpgradeModalProps> = ({ skill, isO
 
 				<Box my='md'>
 					<Text fw={600} mb='xs'>
-						Upgrade Requirements:
+						Opgraderingsbevis:
 					</Text>
 
 					<Group gap='xs'>
 						<Text size='sm' c={hasLevel ? 'green' : 'red'}>
-							Required Level: {requiredLevel}
+							Krævet Niveau: {requiredLevel}
 						</Text>
 					</Group>
 
 					<Text size='sm' c={canAfford ? 'green' : 'red'}>
-						Cost: {skill.cost} points
+						Omkostninger: {skill.cost} point
 					</Text>
 
-					{skill.requiredSkills && skill.requiredSkills.length > 0 && <Text size='sm'>Required Skills: Unlocked</Text>}
+					{skill.requiredSkills && skill.requiredSkills.length > 0 && <Text size='sm'>Krævede Færdigheder: Låst op</Text>}
 				</Box>
 
 				<Group justify='flex-end' mt='md'>
 					<Button variant='outline' onClick={onClose}>
-						Cancel
+						Annuller
 					</Button>
 					<Button onClick={handleUpgrade} disabled={skill.level >= skill.maxLevel || !canAfford || !hasLevel}>
-						Upgrade
+						Opgrader
 					</Button>
 				</Group>
 			</Stack>

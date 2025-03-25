@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Group, Box, useMantineTheme } from '@mantine/core';
-import { Medal, CurrencyCircleDollar } from '@phosphor-icons/react';
+import { Trophy, Star } from '@phosphor-icons/react';
 
 interface SkillTreeHeaderProps {
 	name: string;
@@ -28,16 +28,16 @@ export const SkillTreeHeader: React.FC<SkillTreeHeaderProps> = ({ name, playerLe
 
 				<Group gap='lg'>
 					<Group gap='xs'>
-						<Medal size={24} color={theme.colors.yellow[5]} />
+						<Trophy size={24} color={theme.colors.yellow[5]} />
 						<Text c='white' fw={600}>
-							Level {playerLevel}
+							Niveau {playerLevel}
 						</Text>
 					</Group>
 
 					<Group gap='xs'>
-						<CurrencyCircleDollar size={24} color={theme.colors.green[5]} />
+						<Star size={24} color={theme.colors.green[5]} />
 						<Text c='white' fw={600}>
-							{availablePoints} Points
+							{availablePoints} Færdighhedspoint
 						</Text>
 					</Group>
 				</Group>

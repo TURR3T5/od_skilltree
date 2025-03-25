@@ -83,22 +83,6 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data, isConnectable = fals
 						onClick={handleNodeClick}
 						className={nodeClassName}
 					>
-						<Transition mounted={isAnimating} transition='pop' duration={500}>
-							{(styles) => (
-								<Box
-									style={{
-										...styles,
-										position: 'absolute',
-										width: '120%',
-										height: '120%',
-										background: 'rgba(76, 175, 80, 0.3)',
-										borderRadius: theme.radius.sm,
-										zIndex: 10,
-									}}
-								/>
-							)}
-						</Transition>
-
 						<Box
 							style={{
 								transform: 'rotate(-45deg)',
