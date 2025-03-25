@@ -6,12 +6,11 @@ import dagre from '@dagrejs/dagre';
 
 import { SkillTreeHeader } from './SkillTreeHeader';
 import { SkillNode } from './SkillNode';
-import { SkillTreeProps } from '../../types/SkillTypes';
+import { SkillTreeProps, Skill } from '../../types/SkillTypes';
 import { SkillNodeData } from '../../types/SkillNodeData';
 import { calculateSkillTreeLayout, isSkillUnlockable } from '../../utils/skillTreeHelper';
 
-// Type-safe layout function
-const getLayoutedElements = (nodes: Node<SkillNodeData>[], edges: Edge[], direction: 'TB' | 'LR' = 'TB'): { nodes: Node<SkillNodeData>[]; edges: Edge[] } => {
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction: 'TB' | 'LR' = 'TB'): { nodes: Node[]; edges: Edge[] } => {
 	const dagreGraph = new dagre.graphlib.Graph();
 	dagreGraph.setDefaultEdgeLabel(() => ({}));
 	const isHorizontal = direction === 'LR';
@@ -34,6 +33,7 @@ const getLayoutedElements = (nodes: Node<SkillNodeData>[], edges: Edge[], direct
 		const nodeWithPosition = dagreGraph.node(node.id);
 		return {
 			...node,
+			type: node.type || 'default', // Ensure type is always a string
 			targetPosition: isHorizontal ? Position.Left : Position.Top,
 			sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
 			position: {
@@ -52,8 +52,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 	const theme = useMantineTheme();
 	const reactFlowRef = useRef<any>(null);
 
-	// Memoized initial nodes with type-safe data
-	const initialNodes: Node<SkillNodeData>[] = useMemo(() => {
+	const initialNodes: SkillNodeData[] = useMemo(() => {
 		const layout = calculateSkillTreeLayout(data.skills, data.connections);
 
 		return data.skills.map((skill, index) => ({
@@ -64,24 +63,31 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 			width: 120,
 			height: 120,
 			data: {
+				id: skill.id,
+				type: 'skillNode',
+				position: layout[index],
 				skill,
-				onUpgrade: () => {
-					onSkillUpgrade(skill.id);
-				},
+				onUpgrade: () => onSkillUpgrade(skill.id),
 				onDowngrade: onSkillDowngrade ? () => onSkillDowngrade(skill.id) : undefined,
 				isUpgradeable: isSkillUnlockable(skill, data.skills, data.playerLevel, data.availablePoints),
 				playerLevel: data.playerLevel,
 				availablePoints: data.availablePoints,
+				data: {
+					skill,
+					onUpgrade: () => onSkillUpgrade(skill.id),
+					onDowngrade: onSkillDowngrade ? () => onSkillDowngrade(skill.id) : undefined,
+					isUpgradeable: isSkillUnlockable(skill, data.skills, data.playerLevel, data.availablePoints),
+					playerLevel: data.playerLevel,
+					availablePoints: data.availablePoints,
+				},
 			},
 		}));
 	}, [data.skills, data.connections, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
 
-	// Memoized initial edges with proper typing
 	const initialEdges: Edge[] = useMemo(
 		() =>
 			data.connections.map((connection) => {
 				const sourceSkill = data.skills.find((s) => s.id === connection.source);
-				const targetSkill = data.skills.find((s) => s.id === connection.target);
 				const isPathUnlocked = sourceSkill?.isUnlocked || false;
 
 				return {
@@ -106,39 +112,24 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 		[data.connections, data.skills, theme.colors]
 	);
 
-	// Nodes and edges state with type inference
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-	// Update layout when data changes
 	React.useEffect(() => {
 		const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 		setNodes(layoutedNodes);
 		setEdges(layoutedEdges);
 	}, [data, initialNodes, initialEdges, setNodes, setEdges]);
 
-	// Node types with type safety
 	const nodeTypes: NodeTypes = {
 		skillNode: SkillNode,
 	};
 
-	// Initialize view
 	const onInit = useCallback((instance: any) => {
 		setTimeout(() => {
 			instance.fitView({ padding: 0.2 });
 		}, 200);
 	}, []);
-
-	// Layout recalculation
-	const onLayout = useCallback(
-		(direction: 'TB' | 'LR') => {
-			const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, direction);
-
-			setNodes([...layoutedNodes]);
-			setEdges([...layoutedEdges]);
-		},
-		[nodes, edges, setNodes, setEdges]
-	);
 
 	return (
 		<Container w={1100}>
