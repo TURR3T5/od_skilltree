@@ -15,64 +15,58 @@ export const canUpgradeSkill = (
 };
 
 export const calculateSkillTreeLayout = (skills: Skill[], connections: SkillConnection[]): { x: number, y: number }[] => {
-    const layout: { x: number, y: number }[] = [];
-    
-    // Create a graph of skill dependencies
-    const skillGraph = new Map<string, string[]>();
-    connections.forEach(conn => {
-      if (!skillGraph.has(conn.source)) {
-        skillGraph.set(conn.source, []);
-      }
-      skillGraph.get(conn.source)!.push(conn.target);
-    });
+  const layout: { x: number, y: number }[] = [];
   
-    // Find root skills (skills with no dependencies)
-    const rootSkills = skills.filter(skill => 
-      !connections.some(conn => conn.target === skill.id)
+  const basePositions = [
+    { x: 250, y: 100 },   // Left start
+    { x: 500, y: 100 },   // Middle start
+    { x: 750, y: 100 }    // Right start
+  ];
+
+  const verticalSpacing = 250;
+  const horizontalSpacing = 250;
+
+  basePositions.forEach((basePos, index) => {
+    layout.push({ x: basePos.x, y: basePos.y });
+
+    const relevantSkills = skills.filter(skill => 
+      connections.some(conn => 
+        conn.source === skills[index].id && conn.target === skill.id
+      )
     );
-  
-    // Recursive layout function
-    const positionSkills = (skill: Skill, depth: number, column: number): { x: number, y: number } => {
-      const baseX = 500;  // Center X
-      const baseY = 200;  // Starting Y
-      const horizontalSpacing = 250;
-      const verticalSpacing = 200;
-  
-      // Calculate x position based on column
-      const x = baseX + (column - 1) * horizontalSpacing;
-      
-      // Calculate y position based on depth
-      const y = baseY + depth * verticalSpacing;
-  
-      // Find children skills
-      const children = skills.filter(s => 
+
+    relevantSkills.forEach((skill, subIndex) => {
+      const isLeftSide = index < 1;
+      const isRightSide = index > 1;
+
+      const x = isLeftSide 
+        ? basePos.x - horizontalSpacing
+        : isRightSide 
+        ? basePos.x + horizontalSpacing 
+        : basePos.x;
+
+      const y = basePos.y + verticalSpacing * (subIndex + 1);
+
+      layout.push({ x, y });
+
+      // Add additional level for some skills
+      const additionalSkills = skills.filter(s => 
         connections.some(conn => 
           conn.source === skill.id && conn.target === s.id
         )
       );
-  
-      // If no children, return simple position
-      if (children.length === 0) {
-        return { x, y };
-      }
-  
-      // Distribute children horizontally
-      children.forEach((child, index) => {
-        const childColumn = column + (index - (children.length - 1) / 2);
-        layout.push(positionSkills(child, depth + 1, childColumn));
+
+      additionalSkills.forEach((_additionalSkill, additionalIndex) => {
+        const additionalX = x + (additionalIndex % 2 === 0 ? -horizontalSpacing/2 : horizontalSpacing/2);
+        const additionalY = y + verticalSpacing;
+
+        layout.push({ x: additionalX, y: additionalY });
       });
-  
-      return { x, y };
-    };
-  
-    // Position root skills
-    rootSkills.forEach((rootSkill, index) => {
-      const column = index - (rootSkills.length - 1) / 2;
-      layout.push(positionSkills(rootSkill, 0, column));
     });
-  
-    return layout;
-  };
+  });
+
+  return layout;
+};
 
 export const isSkillUnlockable = (
   skill: Skill, 

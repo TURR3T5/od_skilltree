@@ -1,11 +1,11 @@
 import React, { useCallback, useRef } from 'react';
 import { Box, Container, useMantineTheme, Stack } from '@mantine/core';
-import { ReactFlow, useNodesState, useEdgesState, Controls, Background, NodeTypes, Edge, MarkerType, ReactFlowProvider } from '@xyflow/react';
+import { ReactFlow, useNodesState, useEdgesState, Controls, Background, NodeTypes, MarkerType, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { SkillTreeHeader } from './SkillTreeHeader';
 import { SkillNode } from './SkillNode';
-import { SkillTreeProps, SkillTreeData } from '../../types/SkillTypes';
+import { SkillTreeProps } from '../../types/SkillTypes';
 import { calculateSkillTreeLayout, isSkillUnlockable } from '../../utils/skillTreeHelper';
 
 const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkillDowngrade }) => {
@@ -45,7 +45,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 					source: connection.source,
 					target: connection.target,
 					type: 'smoothstep',
-					animated: isPathUnlocked,
+					animated: true,
 					style: {
 						stroke: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
 						strokeWidth: 3,
