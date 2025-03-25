@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { Container } from '@mantine/core';
 import { SkillTree } from './components';
 import { Shield, Crosshair, Fire, Lightning, Waves, Target, Barbell, Flask, Brain, FlagBanner, Sword } from '@phosphor-icons/react';
 import { SkillTreeData } from './types/SkillTypes';
-import { Container } from '@mantine/core';
 
 const App: React.FC = () => {
 	const [skillTreeData, setSkillTreeData] = useState<SkillTreeData>({
@@ -157,30 +157,35 @@ const App: React.FC = () => {
 		],
 	});
 
-	const handleSkillUpgrade = (skillId: string) => {
+	const handleSkillUpgrade = useCallback((skillId: string) => {
 		setSkillTreeData((prevData) => {
-			const updatedSkills = prevData.skills.map((skill) => {
-				if (skill.id === skillId) {
-					const newLevel = skill.level + 1;
+			const skillToUpgrade = prevData.skills.find((s) => s.id === skillId);
 
-					return {
-						...skill,
-						level: newLevel,
-						isUnlocked: true,
-					};
-				}
-				return skill;
-			});
+			if (!skillToUpgrade || skillToUpgrade.level >= skillToUpgrade.maxLevel) {
+				return prevData;
+			}
+
+			const newAvailablePoints = prevData.availablePoints - skillToUpgrade.cost;
+
+			const updatedSkills = prevData.skills.map((skill) =>
+				skill.id === skillId
+					? {
+							...skill,
+							level: skill.level + 1,
+							isUnlocked: true,
+					  }
+					: skill
+			);
 
 			return {
 				...prevData,
 				skills: updatedSkills,
-				availablePoints: prevData.availablePoints - prevData.skills.find((s) => s.id === skillId)!.cost,
+				availablePoints: newAvailablePoints,
 			};
 		});
-	};
+	}, []);
 
-	const handleSkillDowngrade = (skillId: string) => {
+	const handleSkillDowngrade = useCallback((skillId: string) => {
 		setSkillTreeData((prevData) => {
 			const skillToDowngrade = prevData.skills.find((s) => s.id === skillId);
 
@@ -193,18 +198,16 @@ const App: React.FC = () => {
 			if (dependentSkills.length > 0 && skillToDowngrade.level <= 1) {
 				return prevData;
 			}
-
-			const updatedSkills = prevData.skills.map((skill) => {
-				if (skill.id === skillId) {
-					const newLevel = skill.level - 1;
-					return {
-						...skill,
-						level: newLevel,
-						isUnlocked: newLevel > 0,
-					};
-				}
-				return skill;
-			});
+			
+			const updatedSkills = prevData.skills.map((skill) =>
+				skill.id === skillId
+					? {
+							...skill,
+							level: skill.level - 1,
+							isUnlocked: skill.level > 1,
+					  }
+					: skill
+			);
 
 			return {
 				...prevData,
@@ -212,10 +215,18 @@ const App: React.FC = () => {
 				availablePoints: prevData.availablePoints + skillToDowngrade.cost,
 			};
 		});
-	};
+	}, []);
 
 	return (
-		<Container w={1100} h='100vh' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+		<Container
+			w={1100}
+			h='100vh'
+			style={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+			}}
+		>
 			<SkillTree data={skillTreeData} onSkillUpgrade={handleSkillUpgrade} onSkillDowngrade={handleSkillDowngrade} />
 		</Container>
 	);

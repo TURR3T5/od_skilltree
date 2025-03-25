@@ -1,4 +1,5 @@
 import { IconProps } from '@phosphor-icons/react';
+import React from 'react';
 
 export interface SkillConnection {
   source: string;
@@ -38,4 +39,21 @@ export interface SkillNodeProps {
   onUpgrade: () => void;
   onDowngrade?: () => void;
   isUpgradeable: boolean;
+  playerLevel: number;
+  availablePoints: number;
+}
+
+export interface SkillUpgradeModalProps {
+  skill: Skill;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpgrade: () => void;
+  playerLevel: number;
+  availablePoints: number;
+}
+
+export interface SkillTreeHeaderProps {
+  name: string;
+  playerLevel: number;
+  availablePoints: number;
 }

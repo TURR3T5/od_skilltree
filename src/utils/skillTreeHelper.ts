@@ -1,4 +1,5 @@
 import { Skill, SkillConnection } from '../types/SkillTypes';
+import dagre from '@dagrejs/dagre';
 
 export const canUpgradeSkill = (
   skill: Skill, 
@@ -9,63 +10,43 @@ export const canUpgradeSkill = (
 
   const levelRequirement = skill.level * 5;
   if (playerLevel < levelRequirement) return false;
+
   if (availablePoints < skill.cost) return false;
 
   return true;
 };
 
-export const calculateSkillTreeLayout = (skills: Skill[], connections: SkillConnection[]): { x: number, y: number }[] => {
-  const layout: { x: number, y: number }[] = [];
-  
-  const basePositions = [
-    { x: 250, y: 100 },   // Left start
-    { x: 500, y: 100 },   // Middle start
-    { x: 750, y: 100 }    // Right start
-  ];
+export const calculateSkillTreeLayout = (
+  skills: Skill[], 
+  connections: SkillConnection[]
+): { x: number; y: number }[] => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+  dagreGraph.setGraph({ rankdir: 'TB' });
 
-  const verticalSpacing = 250;
-  const horizontalSpacing = 250;
+  const nodeWidth = 100;
+  const nodeHeight = 100;
 
-  basePositions.forEach((basePos, index) => {
-    layout.push({ x: basePos.x, y: basePos.y });
-
-    const relevantSkills = skills.filter(skill => 
-      connections.some(conn => 
-        conn.source === skills[index].id && conn.target === skill.id
-      )
-    );
-
-    relevantSkills.forEach((skill, subIndex) => {
-      const isLeftSide = index < 1;
-      const isRightSide = index > 1;
-
-      const x = isLeftSide 
-        ? basePos.x - horizontalSpacing
-        : isRightSide 
-        ? basePos.x + horizontalSpacing 
-        : basePos.x;
-
-      const y = basePos.y + verticalSpacing * (subIndex + 1);
-
-      layout.push({ x, y });
-
-      // Add additional level for some skills
-      const additionalSkills = skills.filter(s => 
-        connections.some(conn => 
-          conn.source === skill.id && conn.target === s.id
-        )
-      );
-
-      additionalSkills.forEach((_additionalSkill, additionalIndex) => {
-        const additionalX = x + (additionalIndex % 2 === 0 ? -horizontalSpacing/2 : horizontalSpacing/2);
-        const additionalY = y + verticalSpacing;
-
-        layout.push({ x: additionalX, y: additionalY });
-      });
+  skills.forEach((skill) => {
+    dagreGraph.setNode(skill.id, {
+      width: nodeWidth,
+      height: nodeHeight,
     });
   });
 
-  return layout;
+  connections.forEach((connection) => {
+    dagreGraph.setEdge(connection.source, connection.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  return skills.map((skill) => {
+    const nodeWithPosition = dagreGraph.node(skill.id);
+    return {
+      x: nodeWithPosition.x - nodeWidth / 2,
+      y: nodeWithPosition.y - nodeHeight / 2,
+    };
+  });
 };
 
 export const isSkillUnlockable = (
@@ -91,4 +72,17 @@ export const isSkillUnlockable = (
 
 export const calculateTotalSpentPoints = (skills: Skill[]): number => {
   return skills.reduce((total, skill) => total + (skill.cost * skill.level), 0);
+};
+
+export const findDependentSkills = (
+  skillId: string, 
+  skills: Skill[]
+): Skill[] => {
+  return skills.filter(
+    skill => skill.requiredSkills?.includes(skillId) && skill.isUnlocked
+  );
+};
+
+export const getSkillLevelRequirement = (skill: Skill): number => {
+  return skill.level * 5;
 };

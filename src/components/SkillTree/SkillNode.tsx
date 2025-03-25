@@ -1,44 +1,29 @@
 import React, { useState } from 'react';
 import { Box, Tooltip, Text, useMantineTheme, Badge, Transition } from '@mantine/core';
-import { NodeProps, Node } from '@xyflow/react';
-import { Skill } from '../../types/SkillTypes';
+import { SkillNodeProps } from '../../types/SkillNodeData';
 import { SkillUpgradeModal } from './SkillUpgradeModal';
 
-export interface SkillNode extends Node {
-	type: 'skillNode';
-	id: string;
-	position: { x: number; y: number };
-	data: {
-		skill: Skill;
-		onUpgrade: () => void;
-		onDowngrade?: () => void;
-		isUpgradeable: boolean;
-		playerLevel: number;
-		availablePoints: number;
-	};
-}
-
-export const SkillNode: React.FC<NodeProps<SkillNode>> = ({ data }) => {
+export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 	const theme = useMantineTheme();
-	const { skill, onUpgrade, isUpgradeable, playerLevel, availablePoints } = data;
+	const { skill, onUpgrade, isUpgradeable, playerLevel, availablePoints } = data.data;
 	const SkillIcon = skill.icon;
-	const [showModal, setShowModal] = useState(false);
-	const [isAnimating, setIsAnimating] = useState(false);
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-	const getNodeBackground = () => {
+	const getNodeBackground = (): string => {
 		if (skill.isUnlocked) {
 			return skill.level === skill.maxLevel ? `linear-gradient(135deg, ${theme.colors.green[7]}, ${theme.colors.green[9]})` : `linear-gradient(135deg, ${theme.colors.blue[7]}, ${theme.colors.blue[9]})`;
 		}
 		return `linear-gradient(135deg, ${theme.colors.dark[5]}, ${theme.colors.dark[7]})`;
 	};
 
-	const handleNodeClick = () => {
+	const handleNodeClick = (): void => {
 		if (isUpgradeable) {
 			setShowModal(true);
 		}
 	};
 
-	const handleUpgrade = () => {
+	const handleUpgrade = (): void => {
 		setIsAnimating(true);
 		onUpgrade();
 		setTimeout(() => setIsAnimating(false), 500);
@@ -46,7 +31,7 @@ export const SkillNode: React.FC<NodeProps<SkillNode>> = ({ data }) => {
 
 	const requiredLevel = skill.level * 5;
 
-	const getUpgradeGlow = () => {
+	const getUpgradeGlow = (): string => {
 		if (!isUpgradeable) return 'none';
 		return `0 0 20px 5px ${theme.colors.green[5]}`;
 	};
