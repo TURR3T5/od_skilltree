@@ -59,7 +59,7 @@ export const SkillTree: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSk
 	};
 
 	return (
-		<Container>
+		<Container w={1000}>
 			<Stack gap={0}>
 				<SkillTreeHeader name={data.name} playerLevel={data.playerLevel} availablePoints={data.availablePoints} />
 
@@ -67,10 +67,11 @@ export const SkillTree: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSk
 					style={{
 						height: '70vh',
 						background: theme.colors.dark[8],
-						borderRadius: theme.radius.md,
+                        borderBottomLeftRadius: theme.radius.md,
+                        borderBottomRightRadius: theme.radius.md,
 					}}
 				>
-					<ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} nodeTypes={nodeTypes} fitView proOptions={{hideAttribution: true}}>
+					<ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} nodeTypes={nodeTypes} fitView proOptions={{hideAttribution: true}} colorMode='dark' maxZoom={1.2} minZoom={0.75}>
 						<Background color={theme.colors.dark[7]} gap={12} size={1} />
 						<Controls position='bottom-right' />
 					</ReactFlow>

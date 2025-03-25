@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Group, Paper, useMantineTheme } from '@mantine/core';
+import { Text, Group, Container, useMantineTheme } from '@mantine/core';
 import { Medal, CurrencyCircleDollar } from '@phosphor-icons/react';
 
 interface SkillTreeHeaderProps {
@@ -12,12 +12,13 @@ export const SkillTreeHeader: React.FC<SkillTreeHeaderProps> = ({ name, playerLe
 	const theme = useMantineTheme();
 
 	return (
-		<Paper
-			shadow='xs'
+		<Container
 			p='md'
-			mb='md'
+            w='100%'
 			style={{
 				background: `linear-gradient(45deg, ${theme.colors.dark[7]}, ${theme.colors.dark[5]})`,
+                borderTopLeftRadius: theme.radius.md,
+                borderTopRightRadius: theme.radius.md,
 			}}
 		>
 			<Group justify='space-between' align='center'>
@@ -41,6 +42,6 @@ export const SkillTreeHeader: React.FC<SkillTreeHeaderProps> = ({ name, playerLe
 					</Group>
 				</Group>
 			</Group>
-		</Paper>
+		</Container>
 	);
 };

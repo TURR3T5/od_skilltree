@@ -3,6 +3,7 @@ import { SkillTree } from './components';
 import { Sword, Shield, Crosshair } from '@phosphor-icons/react';
 import { SkillTreeData } from './types/SkillTypes';
 import { calculateTotalSpentPoints, isSkillUnlockable } from './utils/skillTreeHelper';
+import { Container } from '@mantine/core';
 
 const App: React.FC = () => {
 	const [skillTreeData, setSkillTreeData] = useState<SkillTreeData>({
@@ -75,7 +76,11 @@ const App: React.FC = () => {
 		});
 	};
 
-	return <SkillTree data={skillTreeData} onSkillUpgrade={handleSkillUpgrade} />;
+	return (
+		<Container w='100%' h='100vh' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+			<SkillTree data={skillTreeData} onSkillUpgrade={handleSkillUpgrade} />
+		</Container>
+	);
 };
 
 export default App;
