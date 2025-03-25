@@ -1,5 +1,7 @@
 import { Skill, SkillConnection } from '../types/SkillTypes';
 import dagre from '@dagrejs/dagre';
+import { SkillNodeData } from '../types/SkillNodeData';
+import { Edge, MarkerType, Position } from '@xyflow/react';
 
 export const canUpgradeSkill = (
   skill: Skill, 
@@ -16,37 +18,59 @@ export const canUpgradeSkill = (
   return true;
 };
 
-export const calculateSkillTreeLayout = (
-  skills: Skill[], 
-  connections: SkillConnection[]
-): { x: number; y: number }[] => {
+export const layoutSkillTree = (
+  nodes: SkillNodeData[], 
+  edges: Edge[], 
+  direction: 'TB' | 'LR' = 'TB'
+): { nodes: SkillNodeData[], edges: Edge[] } => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ rankdir: 'TB' });
-
-  const nodeWidth = 100;
-  const nodeHeight = 100;
-
-  skills.forEach((skill) => {
-    dagreGraph.setNode(skill.id, {
-      width: nodeWidth,
-      height: nodeHeight,
-    });
+  
+  const isHorizontal = direction === 'LR';
+  
+  dagreGraph.setGraph({ 
+    rankdir: direction, 
+    nodesep: 150, 
+    ranksep: 150, 
+    align: 'UL',
+    marginx: 50,
+    marginy: 50,
   });
 
-  connections.forEach((connection) => {
-    dagreGraph.setEdge(connection.source, connection.target);
+  const nodeWidth = 120;
+  const nodeHeight = 120;
+
+  // Add nodes to the graph
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
 
+  // Add edges to the graph
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  // Auto-arrange the graph
   dagre.layout(dagreGraph);
 
-  return skills.map((skill) => {
-    const nodeWithPosition = dagreGraph.node(skill.id);
+  // Update node positions based on dagre calculations
+  const layoutedNodes = nodes.map((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    
     return {
-      x: nodeWithPosition.x - nodeWidth / 2,
-      y: nodeWithPosition.y - nodeHeight / 2,
+      ...node,
+      targetPosition: isHorizontal ? Position.Left : Position.Top,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
+      position: {
+        x: nodeWithPosition.x - nodeWidth / 2,
+        y: nodeWithPosition.y - nodeHeight / 2,
+      },
+      width: nodeWidth,
+      height: nodeHeight,
     };
   });
+
+  return { nodes: layoutedNodes, edges };
 };
 
 export const isSkillUnlockable = (
@@ -85,4 +109,34 @@ export const findDependentSkills = (
 
 export const getSkillLevelRequirement = (skill: Skill): number => {
   return skill.level * 5;
+};
+
+export const createSkillTreeEdges = (
+  connections: SkillConnection[], 
+  skills: Skill[], 
+  theme: any
+): Edge[] => {
+  return connections.map((connection) => {
+    const sourceSkill = skills.find((s) => s.id === connection.source);
+    const isPathUnlocked = sourceSkill?.isUnlocked || false;
+
+    return {
+      id: `${connection.source}-${connection.target}`,
+      source: connection.source,
+      target: connection.target,
+      type: 'smoothstep',
+      animated: isPathUnlocked,
+      style: {
+        stroke: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
+        strokeWidth: 3,
+        opacity: isPathUnlocked ? 1 : 0.5,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
+        width: 20,
+        height: 20,
+      },
+    };
+  });
 };

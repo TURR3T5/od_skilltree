@@ -1,0 +1,98 @@
+.skill-node {
+    transition: transform 0.3s ease;
+}
+
+.skill-node:hover {
+  transform: rotate(45deg) scale(1.05);
+}
+
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #4e4e4e;
+  border: 2px solid #8a8a8a;
+  z-index: 10;
+}
+
+.react-flow__handle-top {
+  top: -5px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -5px;
+}
+
+.react-flow__edge-path {
+  stroke-width: 3;
+  transition: stroke 0.3s ease, opacity 0.3s ease;
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+.skill-node.upgradeable {
+  animation: pulse 2s infinite;
+}
+
+.react-flow__controls {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  margin: 10px;
+}
+
+.react-flow__controls-button {
+  background-color: #333;
+  border-bottom: 1px solid #555;
+  color: #fff;
+}
+
+.react-flow__background {
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__node-skillNode {
+  padding: 0;
+  border-radius: 0;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.node-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+  
