@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SkillTree } from './components';
 import { Sword, Shield, Crosshair } from '@phosphor-icons/react';
+import { SkillTreeData } from './types/SkillTypes';
+import { calculateTotalSpentPoints, isSkillUnlockable } from './utils/skillTreeHelper';
 
 const App: React.FC = () => {
-	const skillTreeData = {
+	const [skillTreeData, setSkillTreeData] = useState<SkillTreeData>({
 		id: 'combat-skills',
 		name: 'Combat Mastery',
 		description: 'Unlock and improve your combat abilities',
@@ -47,10 +49,30 @@ const App: React.FC = () => {
 			{ source: 'sword-mastery', target: 'shield-defense' },
 			{ source: 'shield-defense', target: 'precision-strike' },
 		],
-	};
+	});
 
 	const handleSkillUpgrade = (skillId: string) => {
-		console.log(`Skill ${skillId} upgraded`);
+		setSkillTreeData((prevData) => {
+			const updatedSkills = prevData.skills.map((skill) => {
+				if (skill.id === skillId) {
+					const newLevel = skill.level + 1;
+					const totalSpentPoints = calculateTotalSpentPoints(prevData.skills) + skill.cost;
+
+					return {
+						...skill,
+						level: newLevel,
+						isUnlocked: true,
+					};
+				}
+				return skill;
+			});
+
+			return {
+				...prevData,
+				skills: updatedSkills,
+				availablePoints: prevData.availablePoints - prevData.skills.find((s) => s.id === skillId)!.cost,
+			};
+		});
 	};
 
 	return <SkillTree data={skillTreeData} onSkillUpgrade={handleSkillUpgrade} />;
