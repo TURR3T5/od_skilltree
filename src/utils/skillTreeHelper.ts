@@ -1,7 +1,7 @@
 import { Skill, SkillConnection } from '../types/SkillTypes';
 import dagre from '@dagrejs/dagre';
 import { SkillNodeData } from '../types/SkillNodeData';
-import { Edge, MarkerType, Position } from '@xyflow/react';
+import { Edge, MarkerType, Position, Node } from '@xyflow/react';
 
 export const canUpgradeSkill = (
   skill: Skill, 
@@ -139,4 +139,32 @@ export const createSkillTreeEdges = (
       },
     };
   });
+};
+
+export const getNodesWithIncomingConnections = (
+  nodes: Node[], 
+  connections: SkillConnection[]
+): string[] => {
+  return nodes
+    .filter(node => connections.some(conn => conn.target === node.id))
+    .map(node => node.id);
+};
+
+export const getRootNodes = (
+  nodes: Node[], 
+  connections: SkillConnection[]
+): string[] => {
+  return nodes
+    .filter(node => !connections.some(conn => conn.target === node.id))
+    .map(node => node.id);
+};
+
+export const getNodeConnectionState = (
+  nodeId: string,
+  connections: SkillConnection[]
+): { hasOutgoing: boolean; hasIncoming: boolean } => {
+  return {
+    hasOutgoing: connections.some(conn => conn.source === nodeId),
+    hasIncoming: connections.some(conn => conn.target === nodeId)
+  };
 };

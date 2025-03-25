@@ -1,17 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { Container, Box, Title, Text } from '@mantine/core';
+import { Container } from '@mantine/core';
 import { SkillTree } from './components';
 import { Shield, Fire, Barbell, Sword } from '@phosphor-icons/react';
 import { SkillTreeData } from './types/SkillTypes';
-import { calculateTotalSpentPoints } from './utils/skillTreeHelper';
 
 const App: React.FC = () => {
 	const [skillTreeData, setSkillTreeData] = useState<SkillTreeData>({
 		id: 'combat-skills',
 		name: 'Combat Mastery',
 		description: 'Unlock and improve your combat abilities',
-		playerLevel: 10,
-		availablePoints: 25,
+		playerLevel: 30,
+		availablePoints: 55,
 		skills: [
 			{
 				id: 'sword-mastery',

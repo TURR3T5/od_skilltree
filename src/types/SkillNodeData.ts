@@ -8,6 +8,7 @@ export interface SkillNodeDataContent {
   isUpgradeable: boolean;
   playerLevel: number;
   availablePoints: number;
+  hasIncomingConnections: boolean;
 }
 
 export interface SkillNodeData extends Node {
@@ -21,6 +22,7 @@ export interface SkillNodeData extends Node {
     isUpgradeable: boolean;
     playerLevel: number;
     availablePoints: number;
+    hasIncomingConnections: boolean;
   };
   sourcePosition?: Position;
   targetPosition?: Position;

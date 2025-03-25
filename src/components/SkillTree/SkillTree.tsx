@@ -9,16 +9,16 @@ import { SkillTreeProps } from '../../types/SkillTypes';
 import { SkillNodeData } from '../../types/SkillNodeData';
 import { isSkillUnlockable, layoutSkillTree, createSkillTreeEdges } from '../../utils/skillTreeHelper';
 
-
-
 const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkillDowngrade }) => {
 	const theme = useMantineTheme();
 	const reactFlowRef = useRef<any>(null);
+	const containerWidth = 1100;
 
 	const nodeTypes = useMemo(() => ({ skillNode: SkillNode }), []);
 
 	const initialNodes: SkillNodeData[] = useMemo(() => {
-		return data.skills.map((skill) => ({
+		// First create nodes without the hasIncomingConnections property
+		const basicNodes = data.skills.map((skill) => ({
 			id: skill.id,
 			type: 'skillNode',
 			position: { x: 0, y: 0 }, // Will be positioned by dagre
@@ -32,9 +32,24 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 				isUpgradeable: isSkillUnlockable(skill, data.skills, data.playerLevel, data.availablePoints),
 				playerLevel: data.playerLevel,
 				availablePoints: data.availablePoints,
+				hasIncomingConnections: false, // Default value, will be updated
 			},
 		}));
-	}, [data.skills, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
+
+		// Now determine which nodes have incoming connections
+		return basicNodes.map((node) => {
+			// Check if this node is a target in any connection
+			const hasIncoming = data.connections.some((conn) => conn.target === node.id);
+
+			return {
+				...node,
+				data: {
+					...node.data,
+					hasIncomingConnections: hasIncoming,
+				},
+			};
+		});
+	}, [data.skills, data.connections, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
 
 	const initialEdges: Edge[] = useMemo(() => createSkillTreeEdges(data.connections, data.skills, theme), [data.connections, data.skills, theme]);
 
@@ -61,8 +76,8 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 	}, []);
 
 	return (
-		<Container w={1100}>
-			<Stack gap={0} w={1100}>
+		<Container w={containerWidth} p={0}>
+			<Stack gap={0} w={containerWidth}>
 				<SkillTreeHeader name={data.name} playerLevel={data.playerLevel} availablePoints={data.availablePoints} />
 
 				<Box
@@ -73,16 +88,16 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 					h='60vh'
 					bg='dark.8'
 				>
-					<ReactFlow 
-						ref={reactFlowRef} 
-						nodes={nodes} 
-						edges={edges} 
-						onNodesChange={onNodesChange} 
-						onEdgesChange={onEdgesChange} 
-						nodeTypes={nodeTypes} 
-						connectionLineType={ConnectionLineType.SmoothStep} 
-						fitView 
-						proOptions={{ hideAttribution: true }} 
+					<ReactFlow
+						ref={reactFlowRef}
+						nodes={nodes}
+						edges={edges}
+						onNodesChange={onNodesChange}
+						onEdgesChange={onEdgesChange}
+						nodeTypes={nodeTypes}
+						connectionLineType={ConnectionLineType.SmoothStep}
+						fitView
+						proOptions={{ hideAttribution: true }}
 						minZoom={0.5}
 						maxZoom={1.5}
 						defaultEdgeOptions={{

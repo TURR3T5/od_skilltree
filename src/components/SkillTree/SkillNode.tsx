@@ -4,9 +4,9 @@ import { Handle, Position } from '@xyflow/react';
 import { SkillNodeProps } from '../../types/SkillNodeData';
 import { SkillUpgradeModal } from './SkillUpgradeModal';
 
-export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
+export const SkillNode: React.FC<SkillNodeProps> = ({ data, isConnectable = false }) => {
 	const theme = useMantineTheme();
-	const { skill, onUpgrade, onDowngrade, isUpgradeable, playerLevel, availablePoints } = data;
+	const { skill, onUpgrade, onDowngrade, isUpgradeable, playerLevel, availablePoints, hasIncomingConnections } = data;
 	const SkillIcon = skill.icon;
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -59,7 +59,8 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 
 	return (
 		<>
-			<Handle type='target' position={Position.Top} />
+			{/* Only show the top handle if it's not a root node and is connectable */}
+			{hasIncomingConnections && <Handle type='target' position={Position.Top} isConnectable={isConnectable} />}
 
 			<Box className='node-container'>
 				<Tooltip label={tooltipContent} multiline w={220} position='top' c='white' bg={theme.colors?.dark[7]} style={{ border: `1px solid ${theme.colors?.dark[7]}` }}>
@@ -123,7 +124,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 				</Tooltip>
 			</Box>
 
-			<Handle type='source' position={Position.Bottom} />
+			<Handle type='source' position={Position.Bottom} isConnectable={isConnectable} />
 
 			<SkillUpgradeModal skill={skill} isOpen={showModal} onClose={() => setShowModal(false)} onUpgrade={handleUpgrade} playerLevel={playerLevel} availablePoints={availablePoints} />
 		</>
