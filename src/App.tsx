@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { SkillTree } from './components';
-import { Sword, Shield, Crosshair } from '@phosphor-icons/react';
+import { Shield, Crosshair, Fire, Lightning, Wind, Waves, Target, Barbell, Flask, Brain, FlagBanner, Sword } from '@phosphor-icons/react';
 import { SkillTreeData } from './types/SkillTypes';
-import { calculateTotalSpentPoints, isSkillUnlockable } from './utils/skillTreeHelper';
 import { Container } from '@mantine/core';
 
 const App: React.FC = () => {
@@ -11,7 +10,7 @@ const App: React.FC = () => {
 		name: 'Combat Mastery',
 		description: 'Unlock and improve your combat abilities',
 		playerLevel: 10,
-		availablePoints: 15,
+		availablePoints: 25,
 		skills: [
 			{
 				id: 'sword-mastery',
@@ -42,13 +41,140 @@ const App: React.FC = () => {
 				level: 0,
 				maxLevel: 4,
 				cost: 4,
-				requiredSkills: ['sword-mastery', 'shield-defense'],
+				requiredSkills: ['sword-mastery'],
+				isUnlocked: false,
+			},
+			{
+				id: 'fire-magic',
+				name: 'Fire Magic',
+				description: 'Harness the power of fire',
+				icon: Fire,
+				level: 0,
+				maxLevel: 5,
+				cost: 5,
+				isUnlocked: false,
+			},
+			{
+				id: 'lightning-bolt',
+				name: 'Lightning Bolt',
+				description: 'Call down lightning on your enemies',
+				icon: Lightning,
+				level: 0,
+				maxLevel: 3,
+				cost: 4,
+				requiredSkills: ['fire-magic'],
+				isUnlocked: false,
+			},
+			{
+				id: 'elemental-mastery',
+				name: 'Elemental Mastery',
+				description: 'Master all elements to enhance your magic',
+				icon: Flask,
+				level: 0,
+				maxLevel: 5,
+				cost: 6,
+				requiredSkills: ['fire-magic', 'water-magic'],
+				isUnlocked: false,
+			},
+			{
+				id: 'water-magic',
+				name: 'Water Magic',
+				description: 'Control the flow of water',
+				icon: Waves,
+				level: 0,
+				maxLevel: 5,
+				cost: 5,
+				isUnlocked: false,
+			},
+			{
+				id: 'wind-slash',
+				name: 'Wind Slash',
+				description: 'Cut through enemies with wind',
+				icon: Wind,
+				level: 0,
+				maxLevel: 4,
+				cost: 3,
+				requiredSkills: ['sword-mastery', 'wind-magic'],
+				isUnlocked: false,
+			},
+			{
+				id: 'wind-magic',
+				name: 'Wind Magic',
+				description: 'Manipulate air currents',
+				icon: Wind,
+				level: 0,
+				maxLevel: 3,
+				cost: 5,
+				isUnlocked: false,
+			},
+			{
+				id: 'physical-conditioning',
+				name: 'Physical Conditioning',
+				description: 'Improve physical attributes',
+				icon: Barbell,
+				level: 0,
+				maxLevel: 5,
+				cost: 2,
+				isUnlocked: false,
+			},
+			{
+				id: 'tactical-awareness',
+				name: 'Tactical Awareness',
+				description: 'Improve battlefield awareness',
+				icon: Brain,
+				level: 0,
+				maxLevel: 3,
+				cost: 4,
+				requiredSkills: ['physical-conditioning'],
+				isUnlocked: false,
+			},
+			{
+				id: 'dual-wielding',
+				name: 'Dual Wielding',
+				description: 'Master fighting with two weapons',
+				icon: Sword,
+				level: 0,
+				maxLevel: 5,
+				cost: 5,
+				requiredSkills: ['sword-mastery', 'physical-conditioning'],
+				isUnlocked: false,
+			},
+			{
+				id: 'leadership',
+				name: 'Leadership',
+				description: 'Inspire allies to fight harder',
+				icon: FlagBanner,
+				level: 0,
+				maxLevel: 4,
+				cost: 3,
+				requiredSkills: ['tactical-awareness'],
+				isUnlocked: false,
+			},
+			{
+				id: 'master-archer',
+				name: 'Master Archer',
+				description: 'Become one with the bow',
+				icon: Target,
+				level: 0,
+				maxLevel: 5,
+				cost: 4,
+				requiredSkills: ['precision-strike'],
 				isUnlocked: false,
 			},
 		],
 		connections: [
 			{ source: 'sword-mastery', target: 'shield-defense' },
-			{ source: 'shield-defense', target: 'precision-strike' },
+			{ source: 'sword-mastery', target: 'precision-strike' },
+			{ source: 'precision-strike', target: 'master-archer' },
+			{ source: 'fire-magic', target: 'lightning-bolt' },
+			{ source: 'fire-magic', target: 'elemental-mastery' },
+			{ source: 'water-magic', target: 'elemental-mastery' },
+			{ source: 'sword-mastery', target: 'wind-slash' },
+			{ source: 'wind-magic', target: 'wind-slash' },
+			{ source: 'physical-conditioning', target: 'tactical-awareness' },
+			{ source: 'tactical-awareness', target: 'leadership' },
+			{ source: 'sword-mastery', target: 'dual-wielding' },
+			{ source: 'physical-conditioning', target: 'dual-wielding' },
 		],
 	});
 
@@ -57,7 +183,6 @@ const App: React.FC = () => {
 			const updatedSkills = prevData.skills.map((skill) => {
 				if (skill.id === skillId) {
 					const newLevel = skill.level + 1;
-					const totalSpentPoints = calculateTotalSpentPoints(prevData.skills) + skill.cost;
 
 					return {
 						...skill,
@@ -76,9 +201,43 @@ const App: React.FC = () => {
 		});
 	};
 
+	const handleSkillDowngrade = (skillId: string) => {
+		setSkillTreeData((prevData) => {
+			const skillToDowngrade = prevData.skills.find((s) => s.id === skillId);
+
+			if (!skillToDowngrade || skillToDowngrade.level <= 0) {
+				return prevData;
+			}
+
+			const dependentSkills = prevData.skills.filter((s) => s.requiredSkills?.includes(skillId) && s.isUnlocked);
+
+			if (dependentSkills.length > 0 && skillToDowngrade.level <= 1) {
+				return prevData;
+			}
+
+			const updatedSkills = prevData.skills.map((skill) => {
+				if (skill.id === skillId) {
+					const newLevel = skill.level - 1;
+					return {
+						...skill,
+						level: newLevel,
+						isUnlocked: newLevel > 0,
+					};
+				}
+				return skill;
+			});
+
+			return {
+				...prevData,
+				skills: updatedSkills,
+				availablePoints: prevData.availablePoints + skillToDowngrade.cost,
+			};
+		});
+	};
+
 	return (
 		<Container w='100%' h='100vh' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-			<SkillTree data={skillTreeData} onSkillUpgrade={handleSkillUpgrade} />
+			<SkillTree data={skillTreeData} onSkillUpgrade={handleSkillUpgrade} onSkillDowngrade={handleSkillDowngrade} />
 		</Container>
 	);
 };
