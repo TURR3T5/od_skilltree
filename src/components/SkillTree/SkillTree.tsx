@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import { Box, Container, useMantineTheme, Stack } from '@mantine/core';
-import { ReactFlow, useNodesState, useEdgesState, addEdge, Controls, Background, NodeTypes, Connection, ReactFlowProvider, Edge, MarkerType } from '@xyflow/react';
+import { ReactFlow, useNodesState, useEdgesState, Controls, Background, NodeTypes, Edge, MarkerType, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { SkillTreeHeader } from './SkillTreeHeader';
@@ -19,6 +19,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 			id: skill.id,
 			type: 'skillNode',
 			position: layout[index],
+			draggable: false,
 			data: {
 				skill,
 				onUpgrade: () => {
@@ -28,7 +29,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 				isUpgradeable: isSkillUnlockable(skill, data.skills, data.playerLevel, data.availablePoints),
 				playerLevel: data.playerLevel,
 				availablePoints: data.availablePoints,
-			} as SkillNode['data'],
+			},
 		}));
 	}, [data.skills, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
 
@@ -47,7 +48,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 					animated: isPathUnlocked,
 					style: {
 						stroke: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
-						strokeWidth: isPathUnlocked ? 3 : 2,
+						strokeWidth: 3,
 						opacity: isPathUnlocked ? 1 : 0.5,
 					},
 					markerEnd: {
@@ -69,26 +70,15 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 		setEdges(initialEdges);
 	}, [data, initialNodes, initialEdges, setNodes, setEdges]);
 
-	const onConnect = useCallback(
-		(connection: Connection) => {
-			setEdges((eds) => addEdge(connection, eds));
-		},
-		[setEdges]
-	);
-
 	const nodeTypes: NodeTypes = {
 		skillNode: SkillNode,
 	};
 
-    interface ReactFlowInstance {
-        fitView: (options?: { padding?: number }) => void;
-    }
-
-    const onInit = useCallback((instance: ReactFlowInstance) => {
-        setTimeout(() => {
-            instance.fitView({ padding: 0.2 });
-        }, 200);
-    }, []);
+	const onInit = useCallback((instance: any) => {
+		setTimeout(() => {
+			instance.fitView({ padding: 0.2 });
+		}, 200);
+	}, []);
 
 	return (
 		<Container w={1000}>
@@ -103,7 +93,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 						borderBottomRightRadius: theme.radius.md,
 					}}
 				>
-					<ReactFlow ref={reactFlowRef} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} nodeTypes={nodeTypes} fitView proOptions={{ hideAttribution: true }} colorMode='dark' maxZoom={1.2} minZoom={0.75} onInit={onInit}>
+					<ReactFlow ref={reactFlowRef} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} nodeTypes={nodeTypes} fitView proOptions={{ hideAttribution: true }} colorMode='dark' maxZoom={1.2} minZoom={0.75} onInit={onInit}>
 						<Background color={theme.colors.dark[7]} gap={12} size={1} />
 						<Controls position='bottom-right' />
 					</ReactFlow>

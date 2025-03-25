@@ -17,80 +17,37 @@ export const canUpgradeSkill = (
 export const calculateSkillTreeLayout = (skills: Skill[]): { x: number, y: number }[] => {
   const layout: { x: number, y: number }[] = [];
   
-  const categorized = {
-    combat: skills.filter(s => ['sword-mastery', 'shield-defense', 'precision-strike', 'dual-wielding', 'master-archer'].includes(s.id)),
-    magic: skills.filter(s => ['fire-magic', 'water-magic', 'wind-magic', 'lightning-bolt', 'elemental-mastery'].includes(s.id)),
-    support: skills.filter(s => ['physical-conditioning', 'tactical-awareness', 'leadership'].includes(s.id)),
-    hybrid: skills.filter(s => ['wind-slash'].includes(s.id))
-  };
-  
-  for (const skill of skills) {
-    let x = 0;
-    let y = 0;
-    
-    if (categorized.combat.includes(skill)) {
-      if (skill.id === 'sword-mastery') {
-        x = 300;
-        y = 100;
-      } else if (skill.id === 'shield-defense') {
-        x = 150;
-        y = 250;
-      } else if (skill.id === 'precision-strike') {
-        x = 450;
-        y = 250;
-      } else if (skill.id === 'master-archer') {
-        x = 600;
-        y = 400;
-      } else if (skill.id === 'dual-wielding') {
-        x = 200;
-        y = 400;
+  // Define core categories and their positions
+  const categories = [
+    { name: 'core', skills: ['sword-mastery', 'physical-conditioning', 'fire-magic'], x: 500, y: 300 },
+    { name: 'combat', skills: ['shield-defense', 'precision-strike', 'dual-wielding', 'master-archer'], x: 300, y: 500 },
+    { name: 'magic', skills: ['water-magic', 'wind-magic', 'lightning-bolt', 'elemental-mastery'], x: 700, y: 500 },
+    { name: 'support', skills: ['tactical-awareness', 'leadership', 'wind-slash'], x: 500, y: 700 }
+  ];
+
+  // Calculate positions based on category
+  skills.forEach(skill => {
+    let position = { x: 500, y: 300 }; // Default center position
+
+    for (const category of categories) {
+      if (category.skills.includes(skill.id)) {
+        // Spread skills within their category in a radial pattern
+        const categorySkills = category.skills;
+        const index = categorySkills.indexOf(skill.id);
+        const angle = (index / categorySkills.length) * Math.PI * 1.6 - Math.PI * 0.8;
+        const radius = categorySkills.length > 1 ? 200 : 0;
+
+        position = {
+          x: category.x + Math.cos(angle) * radius,
+          y: category.y + Math.sin(angle) * radius
+        };
+        break;
       }
     }
-    else if (categorized.magic.includes(skill)) {
-      if (skill.id === 'fire-magic') {
-        x = 700;
-        y = 100;
-      } else if (skill.id === 'water-magic') {
-        x = 900;
-        y = 100;
-      } else if (skill.id === 'lightning-bolt') {
-        x = 700;
-        y = 250;
-      } else if (skill.id === 'elemental-mastery') {
-        x = 800;
-        y = 400;
-      } else if (skill.id === 'wind-magic') {
-        x = 500;
-        y = 100;
-      }
-    }
-    else if (categorized.support.includes(skill)) {
-      if (skill.id === 'physical-conditioning') {
-        x = 100;
-        y = 100;
-      } else if (skill.id === 'tactical-awareness') {
-        x = 100;
-        y = 250;
-      } else if (skill.id === 'leadership') {
-        x = 100;
-        y = 400;
-      }
-    }
-    else if (categorized.hybrid.includes(skill)) {
-      if (skill.id === 'wind-slash') {
-        x = 400;
-        y = 400;
-      }
-    }
-    else {
-      const index = skills.indexOf(skill);
-      x = ((index % 5) * 200) + 100;
-      y = (Math.floor(index / 5) * 150) + 100;
-    }
-    
-    layout.push({ x, y });
-  }
-  
+
+    layout.push(position);
+  });
+
   return layout;
 };
 

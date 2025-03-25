@@ -41,10 +41,15 @@ export const SkillNode: React.FC<NodeProps<SkillNode>> = ({ data }) => {
 	const handleUpgrade = () => {
 		setIsAnimating(true);
 		onUpgrade();
-		setTimeout(() => setIsAnimating(false), 1000);
+		setTimeout(() => setIsAnimating(false), 500);
 	};
 
 	const requiredLevel = skill.level * 5;
+
+	const getUpgradeGlow = () => {
+		if (!isUpgradeable) return 'none';
+		return `0 0 20px 5px ${theme.colors.green[5]}`;
+	};
 
 	return (
 		<>
@@ -69,6 +74,9 @@ export const SkillNode: React.FC<NodeProps<SkillNode>> = ({ data }) => {
 				multiline
 				w={220}
 				position='top'
+				c='white'
+				bg={theme.colors?.dark[7]}
+				style={{ border: `1px solid ${theme.colors?.dark[7]}` }}
 			>
 				<Box
 					style={{
@@ -84,23 +92,24 @@ export const SkillNode: React.FC<NodeProps<SkillNode>> = ({ data }) => {
 						cursor: isUpgradeable ? 'pointer' : 'not-allowed',
 						opacity: skill.isUnlocked ? 1 : 0.6,
 						transition: 'all 0.3s ease',
-						boxShadow: isAnimating ? `0 0 20px 5px ${theme.colors.blue[5]}` : isUpgradeable ? `0 0 10px 1px ${theme.colors.blue[3]}` : 'none',
+						boxShadow: getUpgradeGlow(),
 						':hover': {
-							transform: isUpgradeable ? 'rotate(45deg) scale(1.1)' : 'rotate(45deg)',
+							transform: isUpgradeable ? 'rotate(45deg) scale(1.05)' : 'rotate(45deg)',
 						},
 					}}
 					onClick={handleNodeClick}
 				>
-					<Transition mounted={isAnimating} transition='scale' duration={1000}>
+					<Transition mounted={isAnimating} transition='pop' duration={500}>
 						{(styles) => (
 							<Box
 								style={{
 									...styles,
 									position: 'absolute',
-									width: '100%',
-									height: '100%',
-									background: 'rgba(255,255,255,0.3)',
+									width: '120%',
+									height: '120%',
+									background: 'rgba(76, 175, 80, 0.3)', // Soft green glow
 									borderRadius: theme.radius.sm,
+									zIndex: 10,
 								}}
 							/>
 						)}
