@@ -5,7 +5,7 @@ import { SkillUpgradeModal } from './SkillUpgradeModal';
 
 export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 	const theme = useMantineTheme();
-	const { skill, onUpgrade, isUpgradeable, playerLevel, availablePoints } = data.data;
+	const { skill, onUpgrade, isUpgradeable, playerLevel, availablePoints } = data;
 	const SkillIcon = skill.icon;
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [isAnimating, setIsAnimating] = useState<boolean>(false);

@@ -15,10 +15,6 @@ export interface SkillNodeData extends Node {
   type: string;
   position: { x: number; y: number };
   data: {
-    id: string;
-    type: string;
-    position: { x: number; y: number };
-    data: SkillNodeDataContent;
     skill: Skill;
     onUpgrade: () => void;
     onDowngrade?: () => void;

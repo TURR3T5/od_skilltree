@@ -1,16 +1,16 @@
 import React, { useCallback, useRef, useMemo } from 'react';
 import { Box, Container, useMantineTheme, Stack } from '@mantine/core';
-import { ReactFlow, useNodesState, useEdgesState, Controls, Background, NodeTypes, MarkerType, ReactFlowProvider, ConnectionLineType, Node, Edge, Position } from '@xyflow/react';
+import { ReactFlow, useNodesState, useEdgesState, Controls, Background, NodeTypes, MarkerType, ReactFlowProvider, ConnectionLineType, Edge, Position } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from '@dagrejs/dagre';
 
 import { SkillTreeHeader } from './SkillTreeHeader';
 import { SkillNode } from './SkillNode';
-import { SkillTreeProps, Skill } from '../../types/SkillTypes';
+import { SkillTreeProps, Skill, SkillConnection } from '../../types/SkillTypes';
 import { SkillNodeData } from '../../types/SkillNodeData';
 import { calculateSkillTreeLayout, isSkillUnlockable } from '../../utils/skillTreeHelper';
 
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction: 'TB' | 'LR' = 'TB'): { nodes: Node[]; edges: Edge[] } => {
+const getLayoutedElements = (nodes: SkillNodeData[], edges: Edge[], direction: 'TB' | 'LR' = 'TB'): { nodes: SkillNodeData[]; edges: Edge[] } => {
 	const dagreGraph = new dagre.graphlib.Graph();
 	dagreGraph.setDefaultEdgeLabel(() => ({}));
 	const isHorizontal = direction === 'LR';
@@ -33,7 +33,6 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction: 'TB' | 'LR
 		const nodeWithPosition = dagreGraph.node(node.id);
 		return {
 			...node,
-			type: node.type || 'default', // Ensure type is always a string
 			targetPosition: isHorizontal ? Position.Left : Position.Top,
 			sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
 			position: {
@@ -47,6 +46,31 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction: 'TB' | 'LR
 
 	return { nodes: newNodes, edges };
 };
+
+const createEdges = (connections: SkillConnection[], skills: Skill[], theme: any): Edge[] =>
+	connections.map((connection) => {
+		const sourceSkill = skills.find((s) => s.id === connection.source);
+		const isPathUnlocked = sourceSkill?.isUnlocked || false;
+
+		return {
+			id: `${connection.source}-${connection.target}`,
+			source: connection.source,
+			target: connection.target,
+			type: 'smoothstep',
+			animated: true,
+			style: {
+				stroke: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
+				strokeWidth: 3,
+				opacity: isPathUnlocked ? 1 : 0.5,
+			},
+			markerEnd: {
+				type: MarkerType.ArrowClosed,
+				color: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
+				width: 20,
+				height: 20,
+			},
+		};
+	});
 
 const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkillDowngrade }) => {
 	const theme = useMantineTheme();
@@ -63,61 +87,25 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 			width: 120,
 			height: 120,
 			data: {
-				id: skill.id,
-				type: 'skillNode',
-				position: layout[index],
 				skill,
 				onUpgrade: () => onSkillUpgrade(skill.id),
 				onDowngrade: onSkillDowngrade ? () => onSkillDowngrade(skill.id) : undefined,
 				isUpgradeable: isSkillUnlockable(skill, data.skills, data.playerLevel, data.availablePoints),
 				playerLevel: data.playerLevel,
 				availablePoints: data.availablePoints,
-				data: {
-					skill,
-					onUpgrade: () => onSkillUpgrade(skill.id),
-					onDowngrade: onSkillDowngrade ? () => onSkillDowngrade(skill.id) : undefined,
-					isUpgradeable: isSkillUnlockable(skill, data.skills, data.playerLevel, data.availablePoints),
-					playerLevel: data.playerLevel,
-					availablePoints: data.availablePoints,
-				},
+
 			},
 		}));
 	}, [data.skills, data.connections, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
 
-	const initialEdges: Edge[] = useMemo(
-		() =>
-			data.connections.map((connection) => {
-				const sourceSkill = data.skills.find((s) => s.id === connection.source);
-				const isPathUnlocked = sourceSkill?.isUnlocked || false;
-
-				return {
-					id: `${connection.source}-${connection.target}`,
-					source: connection.source,
-					target: connection.target,
-					type: 'smoothstep',
-					animated: true,
-					style: {
-						stroke: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
-						strokeWidth: 3,
-						opacity: isPathUnlocked ? 1 : 0.5,
-					},
-					markerEnd: {
-						type: MarkerType.ArrowClosed,
-						color: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
-						width: 20,
-						height: 20,
-					},
-				};
-			}),
-		[data.connections, data.skills, theme.colors]
-	);
+	const initialEdges: Edge[] = useMemo(() => createEdges(data.connections, data.skills, theme), [data.connections, data.skills, theme]);
 
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
 	React.useEffect(() => {
 		const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
-		setNodes(layoutedNodes);
+		setNodes(layoutedNodes as SkillNodeData[]);
 		setEdges(layoutedEdges);
 	}, [data, initialNodes, initialEdges, setNodes, setEdges]);
 
