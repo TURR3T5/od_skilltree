@@ -13,7 +13,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 	const reactFlowRef = useRef(null);
 
 	const initialNodes = React.useMemo(() => {
-		const layout = calculateSkillTreeLayout(data.skills);
+		const layout = calculateSkillTreeLayout(data.skills, data.connections);
 
 		return data.skills.map((skill, index) => ({
 			id: skill.id,
@@ -31,7 +31,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 				availablePoints: data.availablePoints,
 			},
 		}));
-	}, [data.skills, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
+	}, [data.skills, data.connections, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
 
 	const initialEdges = React.useMemo(
 		() =>

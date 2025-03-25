@@ -1,4 +1,4 @@
-import { Skill } from '../types/SkillTypes';
+import { Skill, SkillConnection } from '../types/SkillTypes';
 
 export const canUpgradeSkill = (
   skill: Skill, 
@@ -14,42 +14,65 @@ export const canUpgradeSkill = (
   return true;
 };
 
-export const calculateSkillTreeLayout = (skills: Skill[]): { x: number, y: number }[] => {
-  const layout: { x: number, y: number }[] = [];
-  
-  // Define core categories and their positions
-  const categories = [
-    { name: 'core', skills: ['sword-mastery', 'physical-conditioning', 'fire-magic'], x: 500, y: 300 },
-    { name: 'combat', skills: ['shield-defense', 'precision-strike', 'dual-wielding', 'master-archer'], x: 300, y: 500 },
-    { name: 'magic', skills: ['water-magic', 'wind-magic', 'lightning-bolt', 'elemental-mastery'], x: 700, y: 500 },
-    { name: 'support', skills: ['tactical-awareness', 'leadership', 'wind-slash'], x: 500, y: 700 }
-  ];
-
-  // Calculate positions based on category
-  skills.forEach(skill => {
-    let position = { x: 500, y: 300 }; // Default center position
-
-    for (const category of categories) {
-      if (category.skills.includes(skill.id)) {
-        // Spread skills within their category in a radial pattern
-        const categorySkills = category.skills;
-        const index = categorySkills.indexOf(skill.id);
-        const angle = (index / categorySkills.length) * Math.PI * 1.6 - Math.PI * 0.8;
-        const radius = categorySkills.length > 1 ? 200 : 0;
-
-        position = {
-          x: category.x + Math.cos(angle) * radius,
-          y: category.y + Math.sin(angle) * radius
-        };
-        break;
+export const calculateSkillTreeLayout = (skills: Skill[], connections: SkillConnection[]): { x: number, y: number }[] => {
+    const layout: { x: number, y: number }[] = [];
+    
+    // Create a graph of skill dependencies
+    const skillGraph = new Map<string, string[]>();
+    connections.forEach(conn => {
+      if (!skillGraph.has(conn.source)) {
+        skillGraph.set(conn.source, []);
       }
-    }
-
-    layout.push(position);
-  });
-
-  return layout;
-};
+      skillGraph.get(conn.source)!.push(conn.target);
+    });
+  
+    // Find root skills (skills with no dependencies)
+    const rootSkills = skills.filter(skill => 
+      !connections.some(conn => conn.target === skill.id)
+    );
+  
+    // Recursive layout function
+    const positionSkills = (skill: Skill, depth: number, column: number): { x: number, y: number } => {
+      const baseX = 500;  // Center X
+      const baseY = 200;  // Starting Y
+      const horizontalSpacing = 250;
+      const verticalSpacing = 200;
+  
+      // Calculate x position based on column
+      const x = baseX + (column - 1) * horizontalSpacing;
+      
+      // Calculate y position based on depth
+      const y = baseY + depth * verticalSpacing;
+  
+      // Find children skills
+      const children = skills.filter(s => 
+        connections.some(conn => 
+          conn.source === skill.id && conn.target === s.id
+        )
+      );
+  
+      // If no children, return simple position
+      if (children.length === 0) {
+        return { x, y };
+      }
+  
+      // Distribute children horizontally
+      children.forEach((child, index) => {
+        const childColumn = column + (index - (children.length - 1) / 2);
+        layout.push(positionSkills(child, depth + 1, childColumn));
+      });
+  
+      return { x, y };
+    };
+  
+    // Position root skills
+    rootSkills.forEach((rootSkill, index) => {
+      const column = index - (rootSkills.length - 1) / 2;
+      layout.push(positionSkills(rootSkill, 0, column));
+    });
+  
+    return layout;
+  };
 
 export const isSkillUnlockable = (
   skill: Skill, 
