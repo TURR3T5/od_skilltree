@@ -16,6 +16,7 @@ export interface Skill {
   cost: number;
   requiredSkills?: string[];
   isUnlocked: boolean;
+  requiredLevel: number;
 }
 
 export interface SkillTreeData {

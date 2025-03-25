@@ -17,28 +17,26 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 	const nodeTypes = useMemo(() => ({ skillNode: SkillNode }), []);
 
 	const initialNodes: SkillNodeData[] = useMemo(() => {
-		// First create nodes without the hasIncomingConnections property
 		const basicNodes = data.skills.map((skill) => ({
 			id: skill.id,
 			type: 'skillNode',
-			position: { x: 0, y: 0 }, // Will be positioned by dagre
+			position: { x: 0, y: 0 },
 			draggable: false,
 			width: 120,
 			height: 120,
 			data: {
 				skill,
+				skills: data.skills,
 				onUpgrade: () => onSkillUpgrade(skill.id),
 				onDowngrade: onSkillDowngrade ? () => onSkillDowngrade(skill.id) : undefined,
 				isUpgradeable: isSkillUnlockable(skill, data.skills, data.playerLevel, data.availablePoints),
 				playerLevel: data.playerLevel,
 				availablePoints: data.availablePoints,
-				hasIncomingConnections: false, // Default value, will be updated
+				hasIncomingConnections: false,
 			},
 		}));
 
-		// Now determine which nodes have incoming connections
 		return basicNodes.map((node) => {
-			// Check if this node is a target in any connection
 			const hasIncoming = data.connections.some((conn) => conn.target === node.id);
 
 			return {
@@ -57,14 +55,12 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
 	React.useEffect(() => {
-		// Apply layout to nodes and edges when data changes
 		const { nodes: layoutedNodes, edges: layoutedEdges } = layoutSkillTree(initialNodes, initialEdges);
 		setNodes(layoutedNodes);
 		setEdges(layoutedEdges);
 	}, [data, initialNodes, initialEdges, setNodes, setEdges]);
 
 	React.useEffect(() => {
-		// Update edges when a skill gets unlocked
 		const updatedEdges = createSkillTreeEdges(data.connections, data.skills, theme);
 		setEdges(updatedEdges);
 	}, [data.skills, data.connections, theme, setEdges]);

@@ -3,6 +3,7 @@ import { Node, NodeProps, Position } from '@xyflow/react';
 
 export interface SkillNodeDataContent {
   skill: Skill;
+  skills: Skill[];
   onUpgrade: () => void;
   onDowngrade?: () => void;
   isUpgradeable: boolean;
@@ -17,6 +18,7 @@ export interface SkillNodeData extends Node {
   position: { x: number; y: number };
   data: {
     skill: Skill;
+    skills: Skill[];
     onUpgrade: () => void;
     onDowngrade?: () => void;
     isUpgradeable: boolean;

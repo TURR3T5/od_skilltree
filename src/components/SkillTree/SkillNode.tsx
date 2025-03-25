@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Tooltip, Text, useMantineTheme, Badge, Transition } from '@mantine/core';
+import { Box, Tooltip, Text, useMantineTheme, Badge, Group } from '@mantine/core';
 import { Handle, Position } from '@xyflow/react';
 import { SkillNodeProps } from '../../types/SkillNodeData';
 import { SkillUpgradeModal } from './SkillUpgradeModal';
 
-export const SkillNode: React.FC<SkillNodeProps> = ({ data, isConnectable = false }) => {
+export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 	const theme = useMantineTheme();
-	const { skill, onUpgrade, onDowngrade, isUpgradeable, playerLevel, availablePoints, hasIncomingConnections } = data;
+	const { skill, onUpgrade, isUpgradeable, playerLevel, availablePoints, hasIncomingConnections } = data;
 	const SkillIcon = skill.icon;
 	const [showModal, setShowModal] = useState<boolean>(false);
-	const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
 	const getNodeBackground = (): string => {
 		if (skill.isUnlocked) {
@@ -24,14 +23,6 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data, isConnectable = fals
 		}
 	};
 
-	const handleUpgrade = (): void => {
-		setIsAnimating(true);
-		onUpgrade();
-		setTimeout(() => setIsAnimating(false), 500);
-	};
-
-	const requiredLevel = skill.level * 5;
-
 	const getUpgradeGlow = (): string => {
 		if (!isUpgradeable) return 'none';
 		return `0 0 20px 5px ${theme.colors.green[5]}`;
@@ -42,16 +33,33 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data, isConnectable = fals
 			<Text fw={700}>{skill.name}</Text>
 			<Text size='sm'>{skill.description}</Text>
 			<Text size='xs' mt={5}>
-				Level: {skill.level}/{skill.maxLevel}
+				Niveau: {skill.level}/{skill.maxLevel}
 			</Text>
-			{requiredLevel > 0 && (
-				<Text size='xs' c={playerLevel >= requiredLevel ? 'green' : 'red'}>
-					Required Level: {requiredLevel}
+			{skill.requiredLevel > 0 && (
+				<Text size='xs' c={playerLevel >= skill.requiredLevel ? 'green' : 'red'}>
+					Krævede niveau: {skill.requiredLevel}
 				</Text>
 			)}
 			<Text size='xs' c={availablePoints >= skill.cost ? 'green' : 'red'}>
-				Cost: {skill.cost} points
+				Pris: {skill.cost} points
 			</Text>
+			{skill.requiredSkills && skill.requiredSkills.length > 0 && (
+				<Box mt='xs'>
+					<Text fw={600} size='xs'>
+						Krævede skills:
+					</Text>
+					<Group gap='xs' mt={4}>
+						{skill.requiredSkills.map((requiredSkillId) => {
+							const requiredSkill = data.skills.find((s) => s.id === requiredSkillId);
+							return requiredSkill ? (
+								<Badge key={requiredSkillId} variant='light' color={requiredSkill.isUnlocked ? 'green' : 'red'} size='xs'>
+									{requiredSkill.name}
+								</Badge>
+							) : null;
+						})}
+					</Group>
+				</Box>
+			)}
 		</Box>
 	);
 
@@ -59,11 +67,10 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data, isConnectable = fals
 
 	return (
 		<>
-			{/* Only show the top handle if it's not a root node and is connectable */}
-			{hasIncomingConnections && <Handle type='target' position={Position.Top} isConnectable={isConnectable} />}
+			{hasIncomingConnections && <Handle type='target' position={Position.Top} isConnectable={false} />}
 
 			<Box className='node-container'>
-				<Tooltip label={tooltipContent} multiline w={220} position='top' c='white' bg={theme.colors?.dark[7]} style={{ border: `1px solid ${theme.colors?.dark[7]}` }}>
+				<Tooltip label={tooltipContent} multiline w={250} position='top' c='white' bg={theme.colors?.dark[7]} style={{ border: `1px solid ${theme.colors?.dark[7]}` }}>
 					<Box
 						style={{
 							position: 'relative',
@@ -108,9 +115,19 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data, isConnectable = fals
 				</Tooltip>
 			</Box>
 
-			<Handle type='source' position={Position.Bottom} isConnectable={isConnectable} />
+			<Handle type='source' position={Position.Bottom} isConnectable={false} />
 
-			<SkillUpgradeModal skill={skill} isOpen={showModal} onClose={() => setShowModal(false)} onUpgrade={handleUpgrade} playerLevel={playerLevel} availablePoints={availablePoints} />
+			<SkillUpgradeModal
+				skill={skill}
+				isOpen={showModal}
+				onClose={() => setShowModal(false)}
+				onUpgrade={() => {
+					onUpgrade();
+					setShowModal(false);
+				}}
+				playerLevel={playerLevel}
+				availablePoints={availablePoints}
+			/>
 		</>
 	);
 };

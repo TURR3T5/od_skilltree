@@ -7,7 +7,7 @@ import { SkillTreeData } from './types/SkillTypes';
 const App: React.FC = () => {
 	const [skillTreeData, setSkillTreeData] = useState<SkillTreeData>({
 		id: 'fiskeri-faerdigheder',
-		name: 'Fiskeri Mesterskab',
+		name: 'Fiskeri Skilltree',
 		description: 'Lås op og forbedrer dine fiskefærdigheder',
 		playerLevel: 30,
 		availablePoints: 55,
@@ -21,6 +21,7 @@ const App: React.FC = () => {
 				maxLevel: 5,
 				cost: 3,
 				isUnlocked: false,
+				requiredLevel: 0,
 			},
 			{
 				id: 'baad-navigation',
@@ -31,6 +32,7 @@ const App: React.FC = () => {
 				maxLevel: 5,
 				cost: 5,
 				isUnlocked: false,
+				requiredLevel: 0,
 			},
 			{
 				id: 'fysisk-udholdenhed',
@@ -41,6 +43,7 @@ const App: React.FC = () => {
 				maxLevel: 5,
 				cost: 2,
 				isUnlocked: false,
+				requiredLevel: 0,
 			},
 			{
 				id: 'avanceret-fangst',
@@ -52,6 +55,7 @@ const App: React.FC = () => {
 				cost: 2,
 				requiredSkills: ['lokke-teknik'],
 				isUnlocked: false,
+				requiredLevel: 5,
 			},
 			{
 				id: 'lokke-teknik',
@@ -63,6 +67,7 @@ const App: React.FC = () => {
 				cost: 2,
 				isUnlocked: false,
 				requiredSkills: ['fysisk-udholdenhed'],
+				requiredLevel: 5,
 			},
 			{
 				id: 'ekstremt-fiskeri',
@@ -74,6 +79,7 @@ const App: React.FC = () => {
 				cost: 4,
 				requiredSkills: ['lokke-teknik'],
 				isUnlocked: false,
+				requiredLevel: 15,
 			},
 			{
 				id: 'dybt-vand-fiskeri',
@@ -84,6 +90,8 @@ const App: React.FC = () => {
 				maxLevel: 3,
 				cost: 3,
 				isUnlocked: false,
+				requiredLevel: 10,
+				requiredSkills: ['baad-navigation'],
 			},
 			{
 				id: 'kyst-fiskeri',
@@ -94,6 +102,8 @@ const App: React.FC = () => {
 				maxLevel: 3,
 				cost: 2,
 				isUnlocked: false,
+				requiredLevel: 10,
+				requiredSkills: ['baad-navigation'],
 			},
 			{
 				id: 'marine-okologi',
@@ -105,6 +115,7 @@ const App: React.FC = () => {
 				cost: 3,
 				requiredSkills: ['dybt-vand-fiskeri', 'kyst-fiskeri'],
 				isUnlocked: false,
+				requiredLevel: 20,
 			},
 			{
 				id: 'udholdenhed-fiskeri',
@@ -116,6 +127,7 @@ const App: React.FC = () => {
 				cost: 2,
 				requiredSkills: ['fysisk-udholdenhed'],
 				isUnlocked: false,
+				requiredLevel: 15,
 			},
 			{
 				id: 'professionel-fisker',
@@ -127,23 +139,20 @@ const App: React.FC = () => {
 				cost: 5,
 				requiredSkills: ['lokke-teknik'],
 				isUnlocked: false,
+				requiredLevel: 25,
 			}
 		],
 		connections: [
-			{ source: 'stang-mesterskab', target: 'avanceret-fangst' },
 			{ source: 'stang-mesterskab', target: 'lokke-teknik' },
+			{ source: 'lokke-teknik', target: 'avanceret-fangst' },
 			{ source: 'lokke-teknik', target: 'ekstremt-fiskeri' },
 			{ source: 'baad-navigation', target: 'dybt-vand-fiskeri' },
 			{ source: 'baad-navigation', target: 'kyst-fiskeri' },
-			{ source: 'kyst-fiskeri', target: 'marine-okologi' },
 			{ source: 'dybt-vand-fiskeri', target: 'marine-okologi' },
+			{ source: 'kyst-fiskeri', target: 'marine-okologi' },
 			{ source: 'fysisk-udholdenhed', target: 'lokke-teknik' },
 			{ source: 'fysisk-udholdenhed', target: 'udholdenhed-fiskeri' },
-			{ source: 'stang-mesterskab', target: 'udholdenhed-fiskeri' },
-			{ source: 'lokke-teknik', target: 'professionel-fisker' },
-			{ source: 'ekstremt-fiskeri', target: 'professionel-fisker' },
-			{ source: 'marine-okologi', target: 'professionel-fisker' },
-			{ source: 'udholdenhed-fiskeri', target: 'professionel-fisker' }
+			{ source: 'lokke-teknik', target: 'professionel-fisker' }
 		],
 	});
 
