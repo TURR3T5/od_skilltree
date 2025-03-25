@@ -81,17 +81,17 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 	}, []);
 
 	return (
-		<Container w={1000}>
-			<Stack gap={0}>
+		<Container w={1100}>
+			<Stack gap={0} w={1100}>
 				<SkillTreeHeader name={data.name} playerLevel={data.playerLevel} availablePoints={data.availablePoints} />
 
 				<Box
 					style={{
-						height: '70vh',
-						background: theme.colors.dark[8],
 						borderBottomLeftRadius: theme.radius.md,
 						borderBottomRightRadius: theme.radius.md,
 					}}
+					h='60vh'
+					bg='dark.8'
 				>
 					<ReactFlow ref={reactFlowRef} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} nodeTypes={nodeTypes} fitView proOptions={{ hideAttribution: true }} colorMode='dark' maxZoom={1.2} minZoom={0.75} onInit={onInit}>
 						<Background color={theme.colors.dark[7]} gap={12} size={1} />

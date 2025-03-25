@@ -215,7 +215,7 @@ const App: React.FC = () => {
 	};
 
 	return (
-		<Container w='100%' h='100vh' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+		<Container w={1100} h='100vh' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 			<SkillTree data={skillTreeData} onSkillUpgrade={handleSkillUpgrade} onSkillDowngrade={handleSkillDowngrade} />
 		</Container>
 	);

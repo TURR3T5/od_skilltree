@@ -14,7 +14,8 @@ export const SkillTreeHeader: React.FC<SkillTreeHeaderProps> = ({ name, playerLe
 	return (
 		<Container
 			p='md'
-            w='100%'
+            w={1100}
+			m={0}
 			style={{
 				background: `linear-gradient(45deg, ${theme.colors.dark[7]}, ${theme.colors.dark[5]})`,
                 borderTopLeftRadius: theme.radius.md,
