@@ -75,7 +75,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 
 	return (
 		<>
-			{hasIncomingConnections && <Handle type='target' position={Position.Top} isConnectable={false} />}
+			{hasIncomingConnections && <Handle type='target' position={Position.Top} isConnectable={false} style={{ opacity: 0 }} />}
 
 			<Box className='node-container'>
 				<Tooltip label={tooltipContent} multiline w={250} position='top' c='white' bg={theme.colors?.dark[7]} style={{ border: `1px solid ${theme.colors?.dark[7]}` }}>
@@ -134,7 +134,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 				</Tooltip>
 			</Box>
 
-			<Handle type='source' position={Position.Bottom} isConnectable={false} />
+			<Handle type='source' position={Position.Bottom} isConnectable={false} style={{ opacity: 0 }} />
 
 			<SkillUpgradeModal
 				skill={skill}
