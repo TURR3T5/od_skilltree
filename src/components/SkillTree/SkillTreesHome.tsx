@@ -33,7 +33,7 @@ export const SkillTreesHome: React.FC<SkillTreesHomeProps> = ({ skillTrees, onSe
 				</Text>
 			</Box>
 
-			<ScrollArea h='calc(100% - 90px)' scrollbarSize={8} type='auto'>
+			<ScrollArea h='760px' scrollbarSize={0} type='auto'>
 				<SimpleGrid cols={3} spacing='md' verticalSpacing='md'>
 					{skillTrees.map((skillTree) => (
 						<SkillTreePreview key={skillTree.id} skillTree={skillTree} onSelect={onSelectSkillTree} isActive={activeSkillTreeId === skillTree.id} />

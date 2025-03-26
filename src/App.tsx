@@ -639,7 +639,7 @@ const App: React.FC = () => {
 		<Container w='100%' h='100vh' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 			<Container
 				w='100%'
-				h='80vh'
+				h='920px'
 				p='lg'
 				style={{
 					display: 'flex',

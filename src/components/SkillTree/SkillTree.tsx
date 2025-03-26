@@ -107,7 +107,7 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 						borderBottomRightRadius: theme.radius.md,
 						position: 'relative',
 					}}
-					h='60vh'
+					h='750px'
 					bg='dark.8'
 				>
 					{/* Completion status overlay */}
