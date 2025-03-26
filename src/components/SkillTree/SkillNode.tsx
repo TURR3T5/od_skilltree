@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Tooltip, Text, useMantineTheme, Badge, Group, Transition } from '@mantine/core';
+import { Box, Tooltip, Text, useMantineTheme, Badge, Group } from '@mantine/core';
 import { Handle, Position } from '@xyflow/react';
 import { SkillNodeProps } from '../../types/SkillNodeData';
 import { SkillUpgradeModal } from './SkillUpgradeModal';
@@ -9,7 +9,6 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 	const { skill, onUpgrade, isUpgradeable, playerLevel, availablePoints, hasIncomingConnections } = data;
 	const SkillIcon = skill.icon;
 	const [showModal, setShowModal] = useState<boolean>(false);
-	const [isHovered, setIsHovered] = useState<boolean>(false);
 
 	const getNodeBackground = (): string => {
 		if (skill.isUnlocked) {
@@ -99,8 +98,6 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 						}}
 						onClick={handleNodeClick}
 						className={nodeClassName}
-						onMouseEnter={() => setIsHovered(true)}
-						onMouseLeave={() => setIsHovered(false)}
 					>
 						<Box
 							style={{
