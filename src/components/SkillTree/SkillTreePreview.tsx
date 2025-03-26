@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Text, Group, Progress, Box, Badge, useMantineTheme, RingProgress } from '@mantine/core';
+import { Card, Text, Group, Progress, Box, Indicator, useMantineTheme, RingProgress } from '@mantine/core';
 import { Trophy, Star } from '@phosphor-icons/react';
 import { SkillTreeData } from '../../types/SkillTypes';
 import { SkillTreeMiniPreview } from './SkillTreeMiniPreview';
@@ -72,15 +72,14 @@ export const SkillTreePreview: React.FC<SkillTreePreviewProps> = ({ skillTree, o
 				</Text>
 			</Card.Section>
 
-			<Badge
+			<Indicator
 				color={hasUpgradeableSkills ? 'green' : 'red'}
-				variant='filled'
+                processing
 				style={{
 					position: 'absolute',
-					top: 25,
-					right: 15,
+					top: 35,
+					right: 20,
 					zIndex: 10,
-					animation: hasUpgradeableSkills ? 'pulse 2s infinite' : 'pulseRed 2s infinite',
 				}}
 			/>
 
