@@ -40,20 +40,16 @@ export const layoutSkillTree = (
   const nodeWidth = 120;
   const nodeHeight = 120;
 
-  // Add nodes to the graph
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
 
-  // Add edges to the graph
   edges.forEach((edge) => {
     dagreGraph.setEdge(edge.source, edge.target);
   });
 
-  // Auto-arrange the graph
   dagre.layout(dagreGraph);
 
-  // Update node positions based on dagre calculations
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     
@@ -119,6 +115,16 @@ export const createSkillTreeEdges = (
   return connections.map((connection) => {
     const sourceSkill = skills.find((s) => s.id === connection.source);
     const isPathUnlocked = sourceSkill?.isUnlocked || false;
+    const isMaxedOut = sourceSkill?.level === sourceSkill?.maxLevel;
+
+    let edgeColor;
+    if (isMaxedOut) {
+      edgeColor = theme.colors.green[6];
+    } else if (isPathUnlocked) {
+      edgeColor = theme.colors.blue[6];
+    } else {
+      edgeColor = theme.colors.gray[7];
+    }
 
     return {
       id: `${connection.source}-${connection.target}`,
@@ -127,13 +133,13 @@ export const createSkillTreeEdges = (
       type: 'smoothstep',
       animated: isPathUnlocked,
       style: {
-        stroke: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
+        stroke: edgeColor,
         strokeWidth: 3,
         opacity: isPathUnlocked ? 1 : 0.5,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isPathUnlocked ? theme.colors.blue[6] : theme.colors.gray[7],
+        color: edgeColor,
         width: 20,
         height: 20,
       },

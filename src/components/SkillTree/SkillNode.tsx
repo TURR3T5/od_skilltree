@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Tooltip, Text, useMantineTheme, Badge, Group } from '@mantine/core';
+import { Box, Tooltip, Text, useMantineTheme, Badge, Group, Transition } from '@mantine/core';
 import { Handle, Position } from '@xyflow/react';
 import { SkillNodeProps } from '../../types/SkillNodeData';
 import { SkillUpgradeModal } from './SkillUpgradeModal';
@@ -9,10 +9,17 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 	const { skill, onUpgrade, isUpgradeable, playerLevel, availablePoints, hasIncomingConnections } = data;
 	const SkillIcon = skill.icon;
 	const [showModal, setShowModal] = useState<boolean>(false);
+	const [isHovered, setIsHovered] = useState<boolean>(false);
 
 	const getNodeBackground = (): string => {
 		if (skill.isUnlocked) {
-			return skill.level === skill.maxLevel ? `linear-gradient(135deg, ${theme.colors.green[7]}, ${theme.colors.green[9]})` : `linear-gradient(135deg, ${theme.colors.blue[7]}, ${theme.colors.blue[9]})`;
+			if (skill.level === skill.maxLevel) {
+				return `linear-gradient(135deg, ${theme.colors.green[7]}, ${theme.colors.green[9]})`;
+			} else if (isUpgradeable) {
+				return `linear-gradient(135deg, ${theme.colors.blue[5]}, ${theme.colors.blue[8]})`;
+			} else {
+				return `linear-gradient(135deg, ${theme.colors.blue[7]}, ${theme.colors.blue[9]})`;
+			}
 		}
 		return `linear-gradient(135deg, ${theme.colors.dark[5]}, ${theme.colors.dark[7]})`;
 	};
@@ -65,6 +72,8 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 
 	const nodeClassName = `skill-node ${isUpgradeable ? 'upgradeable' : ''}`;
 
+	const innerBorderColor = skill.level === skill.maxLevel ? theme.colors.green[3] : skill.isUnlocked ? theme.colors.blue[3] : theme.colors.dark[3];
+
 	return (
 		<>
 			{hasIncomingConnections && <Handle type='target' position={Position.Top} isConnectable={false} />}
@@ -86,9 +95,12 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 							opacity: skill.isUnlocked ? 1 : 0.6,
 							transition: 'all 0.3s ease',
 							boxShadow: getUpgradeGlow(),
+							border: `2px solid ${innerBorderColor}`,
 						}}
 						onClick={handleNodeClick}
 						className={nodeClassName}
+						onMouseEnter={() => setIsHovered(true)}
+						onMouseLeave={() => setIsHovered(false)}
 					>
 						<Box
 							style={{
@@ -101,13 +113,23 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ data }) => {
 								zIndex: 2,
 							}}
 						>
-							<SkillIcon size={32} weight={skill.isUnlocked ? 'fill' : 'regular'} />
-							<Text ta='center' size='xs' mt={4}>
+							<Box>
+								<SkillIcon size={32} weight={skill.isUnlocked ? 'fill' : 'regular'} color={skill.level === skill.maxLevel ? theme.colors.green[3] : undefined} />
+							</Box>
+
+							<Text ta='center' size='xs' mt={4} fw={600}>
 								{skill.level}/{skill.maxLevel}
 							</Text>
-							{!skill.isUnlocked && skill.requiredSkills && skill.requiredSkills.length > 0 && (
+
+							{!skill.isUnlocked && (
 								<Badge size='xs' mt={4} color='gray'>
-									Locked
+									Låst
+								</Badge>
+							)}
+
+							{skill.level === skill.maxLevel && (
+								<Badge size='xs' mt={4} color='gray.2' variant='light'>
+									Maks
 								</Badge>
 							)}
 						</Box>

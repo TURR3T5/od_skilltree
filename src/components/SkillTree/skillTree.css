@@ -51,6 +51,18 @@
   }
 }
 
+@keyframes pulseRed {
+  0% {
+    box-shadow: 0 0 0 0 rgba(175, 76, 76, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
 .skill-node.upgradeable {
   animation: pulse 2s infinite;
 }

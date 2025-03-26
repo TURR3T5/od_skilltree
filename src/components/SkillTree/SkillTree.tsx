@@ -1,4 +1,4 @@
-import { Box, Container, useMantineTheme, Stack } from '@mantine/core';
+import { Box, Container, useMantineTheme, Stack, Text, rgba } from '@mantine/core';
 import { ReactFlow, useNodesState, useEdgesState, Controls, Background, ReactFlowProvider, ConnectionLineType, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './skillTree.css';
@@ -49,7 +49,19 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 		});
 	}, [data.skills, data.connections, data.playerLevel, data.availablePoints, onSkillUpgrade, onSkillDowngrade]);
 
-	const initialEdges: Edge[] = useMemo(() => createSkillTreeEdges(data.connections, data.skills, theme), [data.connections, data.skills, theme]);
+	const initialEdges: Edge[] = useMemo(() => {
+		const edges = createSkillTreeEdges(data.connections, data.skills, theme);
+
+		return edges.map((edge) => {
+			const sourceSkill = data.skills.find((s) => s.id === edge.source);
+			const isMaxedOut = sourceSkill?.level === sourceSkill?.maxLevel;
+
+			return {
+				...edge,
+				className: isMaxedOut ? 'maxed-edge' : undefined,
+			};
+		});
+	}, [data.connections, data.skills, theme]);
 
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -61,8 +73,17 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 	}, [data, initialNodes, initialEdges, setNodes, setEdges]);
 
 	React.useEffect(() => {
-		const updatedEdges = createSkillTreeEdges(data.connections, data.skills, theme);
-		setEdges(updatedEdges);
+		const edgesWithClasses = createSkillTreeEdges(data.connections, data.skills, theme).map((edge) => {
+			const sourceSkill = data.skills.find((s) => s.id === edge.source);
+			const isMaxedOut = sourceSkill?.level === sourceSkill?.maxLevel;
+
+			return {
+				...edge,
+				className: isMaxedOut ? 'maxed-edge' : undefined,
+			};
+		});
+
+		setEdges(edgesWithClasses);
 	}, [data.skills, data.connections, theme, setEdges]);
 
 	const onInit = useCallback((instance: any) => {
@@ -70,6 +91,10 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 			instance.fitView({ padding: 0.2 });
 		}, 200);
 	}, []);
+
+	const totalSkills = data.skills.length;
+	const completedSkills = data.skills.filter((skill) => skill.level === skill.maxLevel).length;
+	const completionPercentage = Math.round((completedSkills / totalSkills) * 100);
 
 	return (
 		<Container w={containerWidth} p={0}>
@@ -80,10 +105,29 @@ const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkil
 					style={{
 						borderBottomLeftRadius: theme.radius.md,
 						borderBottomRightRadius: theme.radius.md,
+						position: 'relative',
 					}}
 					h='60vh'
 					bg='dark.8'
 				>
+					{/* Completion status overlay */}
+					<Box
+						style={{
+							position: 'absolute',
+							top: 10,
+							right: 10,
+							zIndex: 10,
+							background: rgba(theme.colors.dark[9], 0.7),
+							padding: '5px 10px',
+							borderRadius: theme.radius.sm,
+							backdropFilter: 'blur(5px)',
+						}}
+					>
+						<Text size='xs' c='gray.3'>
+							Fremskridt: {completionPercentage}% ({completedSkills}/{totalSkills})
+						</Text>
+					</Box>
+
 					<ReactFlow
 						ref={reactFlowRef}
 						nodes={nodes}
