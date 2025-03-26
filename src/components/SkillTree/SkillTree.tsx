@@ -12,7 +12,7 @@ import { isSkillUnlockable, layoutSkillTree, createSkillTreeEdges } from '../../
 const SkillTreeInner: React.FC<SkillTreeProps> = ({ data, onSkillUpgrade, onSkillDowngrade }) => {
 	const theme = useMantineTheme();
 	const reactFlowRef = useRef<any>(null);
-	const containerWidth = 1100;
+	const containerWidth = '100%';
 
 	const nodeTypes = useMemo(() => ({ skillNode: SkillNode }), []);
 
